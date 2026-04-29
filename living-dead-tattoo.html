@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Living Dead Tattoo Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Cinzel:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #7BFF3A;
+    --green-dark: #4db820;
+    --purple: #6B21A8;
+    --purple-light: #9333EA;
+    --purple-dark: #3b0764;
+    --bg-dark: #0d0a14;
+    --text: #e8e0f0;
+    --text-muted: #a08ab8;
+    --neon-pink: #FF2D78;
+    --neon-blue: #00F5FF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--bg-dark);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 20px; height: 20px;
+    border: 2px solid var(--green);
+    border-radius: 50%;
+    position: fixed; pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease, border-color 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-dot {
+    width: 5px; height: 5px;
+    background: var(--green);
+    border-radius: 50%;
+    position: fixed; pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 500;
+    padding: 1.2rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(to bottom, rgba(13,10,20,0.95), transparent);
+    backdrop-filter: blur(4px);
+  }
+  .nav-logo {
+    font-family: 'Creepster', cursive;
+    font-size: 1.8rem;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(123,255,58,0.6), 0 0 40px rgba(123,255,58,0.3);
+    letter-spacing: 2px;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+  .nav-links a:hover {
+    color: var(--green);
+    text-shadow: 0 0 12px rgba(123,255,58,0.8);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    background: radial-gradient(ellipse at 20% 50%, #1a0a2e 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, #0a1f0a 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, #2d0a4e 0%, transparent 50%),
+                var(--bg-dark);
+  }
+
+  /* Spiderweb SVGs */
+  .web {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.35;
+  }
+  .web-tl { top: -20px; left: -20px; width: 280px; transform: rotate(0deg); }
+  .web-tr { top: -20px; right: -20px; width: 280px; transform: rotate(90deg); }
+  .web-bl { bottom: 20px; left: -20px; width: 200px; transform: rotate(270deg); }
+  .web-br { bottom: 20px; right: -20px; width: 220px; transform: rotate(180deg); }
+
+  /* Neon light bars */
+  .neon-bar {
+    position: absolute;
+    border-radius: 100px;
+    filter: blur(40px);
+    pointer-events: none;
+  }
+  .nb1 { width: 400px; height: 3px; background: var(--green); top: 30%; left: -100px; opacity: 0.6; transform: rotate(-15deg); animation: neonPulse 3s ease-in-out infinite; }
+  .nb2 { width: 300px; height: 3px; background: var(--neon-pink); top: 60%; right: -50px; opacity: 0.5; transform: rotate(10deg); animation: neonPulse 4s ease-in-out infinite 1s; }
+  .nb3 { width: 200px; height: 2px; background: var(--neon-blue); bottom: 25%; left: 20%; opacity: 0.4; animation: neonPulse 5s ease-in-out infinite 2s; }
+
+  @keyframes neonPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+
+  .hero-content {
+    text-align: center; position: relative; z-index: 10;
+    padding: 2rem;
+    animation: heroReveal 1.2s ease both;
+  }
+  @keyframes heroReveal {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+
+  .hero-title {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(4rem, 12vw, 10rem);
+    line-height: 0.95;
+    color: var(--green);
+    text-shadow:
+      0 0 20px rgba(123,255,58,0.8),
+      0 0 60px rgba(123,255,58,0.4),
+      0 0 100px rgba(123,255,58,0.2),
+      4px 4px 0px #2a5500,
+      8px 8px 0px #1a3300;
+    letter-spacing: 4px;
+    animation: titleGlow 3s ease-in-out infinite;
+  }
+  @keyframes titleGlow {
+    0%, 100% { text-shadow: 0 0 20px rgba(123,255,58,0.8), 0 0 60px rgba(123,255,58,0.4), 0 0 100px rgba(123,255,58,0.2), 4px 4px 0px #2a5500, 8px 8px 0px #1a3300; }
+    50% { text-shadow: 0 0 30px rgba(123,255,58,1), 0 0 80px rgba(123,255,58,0.6), 0 0 140px rgba(123,255,58,0.3), 4px 4px 0px #2a5500, 8px 8px 0px #1a3300; }
+  }
+
+  .hero-sub {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    color: var(--text-muted);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-tagline {
+    font-size: 1rem;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto 3rem;
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 1rem 3rem;
+    background: transparent;
+    border: 2px solid var(--green);
+    color: var(--green);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s;
+    cursor: none;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--green);
+    transform: translateX(-101%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+  .btn-primary:hover { color: var(--bg-dark); }
+  .btn-primary:hover::before { transform: translateX(0); }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    color: var(--text-muted); font-size: 0.7rem; letter-spacing: 4px;
+    text-transform: uppercase; animation: bounce 2s ease-in-out infinite;
+  }
+  .scroll-hint span { width: 1px; height: 50px; background: linear-gradient(to bottom, var(--green), transparent); }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+  }
+
+  /* ── SECTION BASE ── */
+  section { padding: 7rem 2rem; position: relative; }
+  .section-label {
+    font-size: 0.7rem; letter-spacing: 6px; text-transform: uppercase;
+    color: var(--green); margin-bottom: 0.8rem;
+  }
+  .section-title {
+    font-family: 'Creepster', cursive;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    color: var(--text);
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(123,255,58,0.2);
+  }
+  .section-title span { color: var(--green); }
+  .divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(to right, var(--green), transparent);
+    margin: 1.5rem 0;
+  }
+
+  /* ── SOBRE MÍ ── */
+  .about {
+    background: linear-gradient(135deg, rgba(107,33,168,0.1) 0%, transparent 50%),
+                linear-gradient(225deg, rgba(10,31,10,0.2) 0%, transparent 50%);
+    max-width: 1200px; margin: 0 auto;
+  }
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+    margin-top: 4rem;
+  }
+  .about-img-wrap {
+    position: relative;
+  }
+  .about-img-placeholder {
+    width: 100%; aspect-ratio: 3/4;
+    background: linear-gradient(135deg, #1a0a2e, #0a1f0a, #2d0a4e);
+    border: 1px solid rgba(123,255,58,0.2);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .about-img-corner {
+    position: absolute;
+    width: 30px; height: 30px;
+    border-color: var(--green);
+    border-style: solid;
+  }
+  .about-img-corner.tl { top: -8px; left: -8px; border-width: 2px 0 0 2px; }
+  .about-img-corner.tr { top: -8px; right: -8px; border-width: 2px 2px 0 0; }
+  .about-img-corner.bl { bottom: -8px; left: -8px; border-width: 0 0 2px 2px; }
+  .about-img-corner.br { bottom: -8px; right: -8px; border-width: 0 2px 2px 0; }
+
+  .about-text p {
+    color: var(--text-muted); line-height: 1.9; margin-bottom: 1.5rem;
+    font-size: 1rem; font-weight: 300;
+  }
+  .about-stats {
+    display: flex; gap: 3rem; margin-top: 2.5rem;
+  }
+  .stat-num {
+    font-family: 'Creepster', cursive;
+    font-size: 3.5rem; color: var(--green);
+    text-shadow: 0 0 20px rgba(123,255,58,0.5);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--text-muted); margin-top: 0.3rem;
+  }
+
+  /* ── ESTILOS ── */
+  .styles-section {
+    background: linear-gradient(to bottom, var(--bg-dark), rgba(59,7,100,0.3), var(--bg-dark));
+    padding: 7rem 2rem;
+  }
+  .styles-inner { max-width: 1200px; margin: 0 auto; }
+  .styles-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px;
+    margin-top: 4rem;
+    border: 1px solid rgba(123,255,58,0.1);
+  }
+  .style-card {
+    position: relative; aspect-ratio: 1;
+    overflow: hidden; cursor: none;
+    background: linear-gradient(135deg, #1a0a2e, #0d0a14);
+  }
+  .style-card:hover .style-overlay { opacity: 1; }
+  .style-card:hover .style-bg { transform: scale(1.1); }
+  .style-bg {
+    position: absolute; inset: 0;
+    transition: transform 0.5s ease;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem;
+  }
+  .style-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,10,20,0.95), rgba(107,33,168,0.4));
+    opacity: 0; transition: opacity 0.4s ease;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 2rem;
+  }
+  .style-name {
+    font-family: 'Creepster', cursive;
+    font-size: 1.8rem; color: var(--green);
+    text-shadow: 0 0 15px rgba(123,255,58,0.7);
+  }
+  .style-desc { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.5; }
+
+  /* card backgrounds */
+  .sc1 { background: radial-gradient(circle at 30% 70%, #1f0a0a, #0d0a14); }
+  .sc2 { background: radial-gradient(circle at 70% 30%, #0a0a1f, #0d0a14); }
+  .sc3 { background: radial-gradient(circle at 50% 50%, #0a1f0a, #0d0a14); }
+  .sc4 { background: radial-gradient(circle at 30% 30%, #1a0a2e, #0d0a14); }
+  .sc5 { background: radial-gradient(circle at 70% 70%, #1f0f0a, #0d0a14); }
+  .sc6 { background: radial-gradient(circle at 50% 20%, #0a1a1f, #0d0a14); }
+
+  /* ── PROCESO ── */
+  .process { max-width: 900px; margin: 0 auto; }
+  .process-list { margin-top: 4rem; }
+  .process-step {
+    display: grid; grid-template-columns: 80px 1fr; gap: 2rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid rgba(123,255,58,0.08);
+    position: relative;
+    transition: background 0.3s;
+  }
+  .process-step:hover { background: rgba(123,255,58,0.02); }
+  .step-num {
+    font-family: 'Creepster', cursive;
+    font-size: 4rem; color: rgba(123,255,58,0.15);
+    line-height: 1; transition: color 0.3s;
+    text-align: center;
+  }
+  .process-step:hover .step-num { color: rgba(123,255,58,0.5); }
+  .step-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--text); letter-spacing: 2px;
+    margin-bottom: 0.7rem;
+  }
+  .step-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; font-weight: 300; }
+
+  /* ── FAQ / INFO ── */
+  .info-section {
+    background: linear-gradient(135deg, rgba(10,31,10,0.2), rgba(107,33,168,0.1));
+    padding: 7rem 2rem;
+  }
+  .info-inner { max-width: 1200px; margin: 0 auto; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 4rem; }
+  .info-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(123,255,58,0.1);
+    padding: 2.5rem;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: none;
+  }
+  .info-card:hover {
+    border-color: rgba(123,255,58,0.4);
+    background: rgba(123,255,58,0.03);
+  }
+  .info-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+  .info-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem; font-weight: 700;
+    letter-spacing: 2px; color: var(--text);
+    margin-bottom: 0.8rem;
+  }
+  .info-body { color: var(--text-muted); font-size: 0.9rem; line-height: 1.8; font-weight: 300; }
+
+  /* ── CONTACTO ── */
+  .contact {
+    max-width: 700px; margin: 0 auto; text-align: center;
+  }
+  .contact-body { color: var(--text-muted); margin: 1.5rem 0 3rem; line-height: 1.8; }
+  .contact-options { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    padding: 1rem 2.5rem;
+    border: 1px solid rgba(123,255,58,0.3);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; letter-spacing: 3px;
+    text-transform: uppercase; text-decoration: none;
+    transition: all 0.3s; cursor: none;
+    background: rgba(255,255,255,0.02);
+  }
+  .btn-secondary:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(123,255,58,0.05);
+    text-shadow: 0 0 10px rgba(123,255,58,0.5);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 3rem 2rem;
+    border-top: 1px solid rgba(123,255,58,0.08);
+    color: rgba(160,138,184,0.4); font-size: 0.75rem; letter-spacing: 3px;
+  }
+  footer strong { color: var(--green); font-weight: 400; font-family: 'Creepster', cursive; font-size: 1rem; }
+
+  /* ── WEB SVG ── */
+  .spiderweb { fill: none; stroke: #7BFF3A; stroke-width: 0.8; }
+
+  /* ── MAPA ── */
+  .location-section { max-width: 1200px; margin: 0 auto; padding: 0 2rem 3rem; padding-top: 5rem;}
+  .map-wrap {
+    margin-top: 2.5rem;
+    position: relative;
+    border: 1px solid rgba(123,255,58,0.2);
+    overflow: hidden;
+  }
+  .map-wrap::before {
+    content: '';
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    box-shadow: inset 0 0 40px rgba(13,10,20,0.6);
+  }
+  .map-wrap iframe {
+    display: block; width: 100%; height: 420px;
+    border: none;
+  }
+  .map-address {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1.2rem 1.5rem;
+    background: rgba(123,255,58,0.04);
+    border-top: 1px solid rgba(123,255,58,0.15);
+  }
+  .map-address-icon { font-size: 1.2rem; }
+  .map-address-text { font-size: 0.85rem; color: var(--text-muted); letter-spacing: 1px; }
+  .map-address-text strong { color: var(--green); font-weight: 500; }
+
+  /* ── VIDEO ── */
+  .video-wrap {
+    margin-top: 4rem;
+    position: relative;
+    border: 1px solid rgba(123,255,58,0.15);
+    overflow: hidden;
+    background: #000;
+  }
+  .video-wrap video {
+    width: 100%; display: block;
+    max-height: 520px; object-fit: cover;
+  }
+  .video-label {
+    position: absolute; top: 1.2rem; left: 1.5rem;
+    font-family: 'Creepster', cursive;
+    font-size: 1rem; color: var(--green);
+    letter-spacing: 3px; text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(123,255,58,0.7);
+    background: rgba(13,10,20,0.6);
+    padding: 0.3rem 0.8rem;
+  }
+  .video-placeholder {
+    width: 100%; height: 320px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1rem;
+    background: linear-gradient(135deg, #1a0a2e, #0a1f0a);
+    color: var(--text-muted); font-size: 0.85rem; letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .video-placeholder span { font-size: 3rem; opacity: 0.4; }
+
+  /* ── WHATSAPP FLOTANTE ── */
+  .wa-float {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 900;
+    width: 58px; height: 58px;
+    background: #25D366;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(37,211,102,0.5);
+    text-decoration: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+    animation: waPulse 2.5s ease-in-out infinite;
+    cursor: none;
+  }
+  .wa-float:hover {
+    transform: scale(1.12);
+    box-shadow: 0 6px 30px rgba(37,211,102,0.8);
+  }
+  .wa-float svg { width: 30px; height: 30px; fill: white; }
+  @keyframes waPulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.5); }
+    50% { box-shadow: 0 4px 35px rgba(37,211,102,0.9), 0 0 0 8px rgba(37,211,102,0.1); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .about-grid, .info-grid { grid-template-columns: 1fr; }
+    .styles-grid { grid-template-columns: 1fr 1fr; }
+    .about-stats { gap: 2rem; }
+    section { padding: 5rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Living Dead</div>
+  <ul class="nav-links">
+    <li><a href="#sobre-mi">Studio</a></li>
+    <li><a href="#estilos">Estilos</a></li>
+    <li><a href="#proceso">Proceso</a></li>
+    <li><a href="#info">Cuidados</a></li>
+    <li><a href="#contacto">Turnos</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <!-- Spiderwebs -->
+  <svg class="web web-tl" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g class="spiderweb">
+      <line x1="0" y1="0" x2="200" y2="200"/>
+      <line x1="0" y1="0" x2="150" y2="200"/>
+      <line x1="0" y1="0" x2="200" y2="100"/>
+      <line x1="0" y1="0" x2="100" y2="200"/>
+      <line x1="0" y1="0" x2="200" y2="50"/>
+      <circle cx="0" cy="0" r="40" fill="none"/>
+      <circle cx="0" cy="0" r="80" fill="none"/>
+      <circle cx="0" cy="0" r="120" fill="none"/>
+      <circle cx="0" cy="0" r="160" fill="none"/>
+    </g>
+  </svg>
+  <svg class="web web-tr" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g class="spiderweb">
+      <line x1="0" y1="0" x2="200" y2="200"/>
+      <line x1="0" y1="0" x2="150" y2="200"/>
+      <line x1="0" y1="0" x2="200" y2="100"/>
+      <line x1="0" y1="0" x2="100" y2="200"/>
+      <line x1="0" y1="0" x2="200" y2="50"/>
+      <circle cx="0" cy="0" r="40" fill="none"/>
+      <circle cx="0" cy="0" r="80" fill="none"/>
+      <circle cx="0" cy="0" r="120" fill="none"/>
+      <circle cx="0" cy="0" r="160" fill="none"/>
+    </g>
+  </svg>
+  <svg class="web web-br" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g class="spiderweb">
+      <line x1="0" y1="0" x2="200" y2="200"/>
+      <line x1="0" y1="0" x2="150" y2="200"/>
+      <line x1="0" y1="0" x2="200" y2="100"/>
+      <line x1="0" y1="0" x2="100" y2="200"/>
+      <circle cx="0" cy="0" r="40" fill="none"/>
+      <circle cx="0" cy="0" r="80" fill="none"/>
+      <circle cx="0" cy="0" r="120" fill="none"/>
+    </g>
+  </svg>
+
+  <div class="neon-bar nb1"></div>
+  <div class="neon-bar nb2"></div>
+  <div class="neon-bar nb3"></div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">✦ Estudio de tatuajes ✦</p>
+    <h1 class="hero-title">LIVING<br>DEAD</h1>
+    <p class="hero-sub">Tattoo Studio</p>
+    <p class="hero-tagline">
+      Arte permanente para almas que no encajan en lo ordinario.<br>
+      Tu cuerpo, tu historia, mi mayor creación.
+    </p>
+    <a href="#contacto" class="btn-primary">Sacar turno</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span></span>
+    scroll
+  </div>
+</section>
+
+<!-- SOBRE MÍ -->
+<section id="sobre-mi">
+  <div class="about">
+    <p class="section-label">✦ El studio</p>
+    <h2 class="section-title">Donde el arte<br><span>no muere</span></h2>
+    <div class="divider"></div>
+    <div class="about-grid">
+      <div class="about-img-wrap">
+        <div class="about-img-placeholder" style="padding:0; overflow:hidden; background:#000;">
+         <video 
+            src="video.mp4" 
+            autoplay 
+            muted 
+            loop 
+            playsinline 
+            style="width:100%; height:100%; object-fit:cover;">
+          </video>
+        </div>
+      </div>
+      <div class="about-text">
+        <p>Cada tatuaje cuenta una historia que va más allá de la piel. Es por eso que mi mayor creación lleva el nombre <strong style="color:var(--green); font-family:'Creepster',cursive; font-size:1.2rem;">Living Dead</strong> — un espacio donde el arte alternativo, el horror y lo oscuro se convierten en algo eterno.</p>
+        <p>Trabajo con cada cliente desde el diseño hasta la cicatrización, porque un tatuaje no termina cuando levanto la máquina. El resultado merece cuidado, atención y respeto absoluto por tu cuerpo.</p>
+        <p>Mi estudio en Buenos Aires es tu espacio seguro para plasmarte lo que siempre soñaste, sin juzgarte y sin límites creativos.</p>
+        <div class="about-stats">
+          <div>
+            <div class="stat-num">5+</div>
+            <div class="stat-label">Años tatuando</div>
+          </div>
+          <div>
+            <div class="stat-num">800+</div>
+            <div class="stat-label">Piezas únicas</div>
+          </div>
+          <div>
+            <div class="stat-num">100%</div>
+            <div class="stat-label">Bioseguridad</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ESTILOS -->
+<section id="estilos" class="styles-section">
+  <div class="styles-inner">
+    <p class="section-label">✦ Especialidades</p>
+    <h2 class="section-title">Estilos que<br><span>me definen</span></h2>
+    <div class="divider"></div>
+    <div class="styles-grid">
+      <div class="style-card sc1">
+        <div class="style-bg">💀</div>
+        <div class="style-overlay">
+          <div class="style-name">Horror / Dark</div>
+          <div class="style-desc">Criaturas, cráneos, iconografía macabra. Lo oscuro hecho arte.</div>
+        </div>
+      </div>
+      <div class="style-card sc2">
+        <div class="style-bg">🕷</div>
+        <div class="style-overlay">
+          <div class="style-name">Blackwork</div>
+          <div class="style-desc">Tinta negra pura, diseños geométricos y orgánicos de alto impacto.</div>
+        </div>
+      </div>
+      <div class="style-card sc3">
+        <div class="style-bg">🌿</div>
+        <div class="style-overlay">
+          <div class="style-name">Neo Traditional</div>
+          <div class="style-desc">Líneas gruesas, colores vivos y composición clásica reinventada.</div>
+        </div>
+      </div>
+      <div class="style-card sc4">
+        <div class="style-bg">🌙</div>
+        <div class="style-overlay">
+          <div class="style-name">Dotwork</div>
+          <div class="style-desc">Puntos que forman sombras, texturas y profundidad imposible.</div>
+        </div>
+      </div>
+      <div class="style-card sc5">
+        <div class="style-bg">🔥</div>
+        <div class="style-overlay">
+          <div class="style-name">Chicano / Old School</div>
+          <div class="style-desc">Tradición, narrativa y símbolo. Arte con historia en cada trazo.</div>
+        </div>
+      </div>
+      <div class="style-card sc6">
+        <div class="style-bg">✨</div>
+        <div class="style-overlay">
+          <div class="style-name">Diseños Propios</div>
+          <div class="style-desc">¿Tenés una idea? La hacemos realidad desde cero, juntos.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESO -->
+<section id="proceso">
+  <div class="process">
+    <p class="section-label">✦ Cómo trabajamos</p>
+    <h2 class="section-title">El camino hacia<br><span>tu tatuaje</span></h2>
+    <div class="divider"></div>
+    <div class="process-list">
+      <div class="process-step">
+        <div class="step-num">01</div>
+        <div>
+          <div class="step-title">CONTACTO Y CONSULTA</div>
+          <div class="step-desc">Me escribís con tu idea, referencias o incluso solo con una emoción que querés transmitir. Charlamos, te hago preguntas, entiendo qué querés decir con tu tatuaje.</div>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">02</div>
+        <div>
+          <div class="step-title">DISEÑO Y PRESUPUESTO</div>
+          <div class="step-desc">Trabajo el boceto basado en tu consulta. Te muestro el diseño, hacemos los ajustes que necesites. El presupuesto se define por tamaño, complejidad y zona del cuerpo.</div>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">03</div>
+        <div>
+          <div class="step-title">RESERVA DEL TURNO</div>
+          <div class="step-desc">Se confirma con una seña que se descuenta del total. La fecha es tuya y el diseño también — no tatúo el mismo diseño dos veces.</div>
+        </div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">04</div>
+        <div>
+          <div class="step-title">SESIÓN DE TATUAJE</div>
+          <div class="step-desc">Trabajamos en un ambiente cómodo, limpio y seguro. Música, buena onda y la concentración que tu pieza merece. El tiempo que lleve lo lleva.</div>
+        </div>
+      </div>
+      <div class="process-step" style="border-bottom:none">
+        <div class="step-num">05</div>
+        <div>
+          <div class="step-title">CICATRIZACIÓN Y SEGUIMIENTO</div>
+          <div class="step-desc">Te explico cómo cuidarlo, te mando info detallada y estoy disponible para cualquier consulta durante el proceso de sanación. Tu tatuaje sana conmigo.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INFO / CUIDADOS -->
+<section id="info" class="info-section">
+  <div class="info-inner">
+    <p class="section-label">✦ Leé esto primero</p>
+    <h2 class="section-title">Antes de<br><span>tatuarte</span></h2>
+    <div class="divider"></div>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">🩸</div>
+        <div class="info-title">BIOSEGURIDAD TOTAL</div>
+        <div class="info-body">Agujas y materiales descartables en cada sesión. Superficies esterilizadas y protocolos estrictos. Tu salud es lo primero, siempre.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🍔</div>
+        <div class="info-title">LLEGÁ CON EL ESTÓMAGO LLENO</div>
+        <div class="info-body">Comé bien antes de la sesión. El nivel de azúcar en sangre ayuda a tolerar mejor el proceso. Nada de alcohol 24hs antes.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">☀️</div>
+        <div class="info-title">ZONA A TATUAR</div>
+        <div class="info-body">La piel debe estar hidratada y sin quemaduras solares. Evitá cremas o lociones el día de la sesión en la zona a trabajar.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">💊</div>
+        <div class="info-title">MEDICAMENTOS Y CONDICIONES</div>
+        <div class="info-body">Informame si tomás anticoagulantes, tenés diabetes, alergias o cualquier condición de salud. La transparencia nos cuida a ambos.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">🔞</div>
+        <div class="info-title">MAYORES DE EDAD</div>
+        <div class="info-body">Solo tatúo a personas mayores de 18 años con DNI. Sin excepciones, sin importar si venís acompañado por un adulto.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">💚</div>
+        <div class="info-title">POST TATUAJE</div>
+        <div class="info-body">Te doy las instrucciones de cicatrización al final de la sesión. Cuatro a seis semanas de cuidados = un tatuaje que dura toda la vida.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACTO -->
+<section id="contacto">
+  <div class="contact">
+    <p class="section-label">✦ Empecemos</p>
+    <h2 class="section-title">¿Querés tatuarte<br><span>conmigo?</span></h2>
+    <div class="divider" style="margin: 1.5rem auto;"></div>
+    <p class="contact-body">
+      Mandame un mensaje con tu idea, la zona del cuerpo y el tamaño aproximado que tenés en mente. Respondí todos los días.
+    </p>
+    <div class="contact-options">
+      <a href="https://instagram.com/" class="btn-secondary" target="_blank">
+        <span>📸</span> Instagram
+      </a>
+      <a href="https://wa.me/5491100000000" class="btn-secondary" target="_blank">
+        <span>💬</span> WhatsApp
+      </a>
+      <a href="mailto:hola@livingdead.com" class="btn-secondary">
+        <span>✉️</span> Email
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<!-- MAPA -->
+<section style="padding: 0 0 5rem; background: linear-gradient(135deg, rgba(10,31,10,0.2), rgba(107,33,168,0.1));">
+  <div class="location-section">
+    <p class="section-label">✦ Dónde encontrarnos</p>
+    <h2 class="section-title" style="font-size:clamp(1.8rem,4vw,2.8rem)">Av. Bartolomé Mitre 5955<br><span>Wilde, Buenos Aires</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div style="width:100%; margin-top:2.5rem; position:relative; border-top:1px solid rgba(123,255,58,0.2); border-bottom:1px solid rgba(123,255,58,0.2); overflow:hidden;">
+    <div style="position:absolute;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 40px rgba(13,10,20,0.6);"></div>
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3280.3!2d-58.3215047!3d-34.701221!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zLTM0LjcwMTIyMSwtNTguMzIxNTA0!5e0!3m2!1ses!2sar!4v1"
+      style="display:block; width:100%; height:420px; border:none;"
+      allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+    </iframe>
+    <div style="width:100%; background:rgba(123,255,58,0.04); border-top:1px solid rgba(123,255,58,0.15); padding:1.2rem 2rem; display:flex; align-items:center; gap:1rem; box-sizing:border-box;">
+      <div class="map-address-icon">📍</div>
+      <div class="map-address-text">
+        <strong>Living Dead Tattoo Studio</strong> — Av. Bartolomé Mitre 5955, Wilde, Provincia de Buenos Aires
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="margin-bottom:0.5rem"><strong>LIVING DEAD</strong></p>
+  <p>© 2026 — Buenos Aires, Argentina — Arte permanente para almas libres</p>
+</footer>
+
+<!-- WHATSAPP FLOTANTE -->
+<a href="https://wa.me/5491100000000" class="wa-float" target="_blank" title="Escribinos por WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const dot = document.getElementById('cursorDot');
+  let mx = 0, my = 0, cx = 0, cy = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.left = mx + 'px';
+    dot.style.top = my + 'px';
+  });
+
+  function animateCursor() {
+    cx += (mx - cx) * 0.12;
+    cy += (my - cy) * 0.12;
+    cursor.style.left = cx + 'px';
+    cursor.style.top = cy + 'px';
+    requestAnimationFrame(animateCursor);
+  }
+  animateCursor();
+
+  // Cursor scale on hover
+  document.querySelectorAll('a, button, .style-card, .info-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.style.transform = 'translate(-50%,-50%) scale(2)');
+    el.addEventListener('mouseleave', () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.process-step, .info-card, .style-card, .about-grid').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
