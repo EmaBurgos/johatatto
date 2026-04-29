@@ -244,8 +244,6 @@
 
   /* ── SOBRE MÍ ── */
   .about {
-    background: linear-gradient(135deg, rgba(107,33,168,0.1) 0%, transparent 50%),
-                linear-gradient(225deg, rgba(10,31,10,0.2) 0%, transparent 50%);
     max-width: 1200px; margin: 0 auto;
   }
   .about-grid {
@@ -876,6 +874,34 @@
       }
     });
   }, { threshold: 0.1 });
+
+   document.querySelectorAll('.process-step, .info-card, .style-card, .about-grid').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    observer.observe(el);
+  });
+ 
+  document.querySelectorAll('.section-label').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+  });
+ 
+  document.querySelectorAll('.section-title').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s';
+    observer.observe(el);
+  });
+ 
+  document.querySelectorAll('.divider').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(10px)';
+    el.style.transition = 'opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s';
+    observer.observe(el);
+  });
 
   document.querySelectorAll('.process-step, .info-card, .style-card, .about-grid').forEach(el => {
     el.style.opacity = '0';
